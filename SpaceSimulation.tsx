@@ -2,7 +2,7 @@
 import React from 'react';
 
 const SpaceSimulation: React.FC = () => {
-  const text = "CHÚC CẬU Ở KHOẢNH TRỜI NÀO CŨNG CÓ THỂ TỎA SÁNG • ";
+  const text = "Sinh nhật vui vẻ • ";
   const repeatedText = text.repeat(3);
   const characters = repeatedText.split("");
   const radius = window.innerWidth < 768 ? 160 : 260;
@@ -98,3 +98,4 @@ const SpaceSimulation: React.FC = () => {
 };
 
 export default SpaceSimulation;
+
