@@ -8,7 +8,6 @@ const App: React.FC = () => {
   const [audioStarted, setAudioStarted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-
   useEffect(() => {
     const handleFirstInteraction = () => {
       if (audioRef.current && !audioStarted) {
@@ -19,7 +18,7 @@ const App: React.FC = () => {
           })
           .catch(err => console.log("Audio play failed", err));
         
-
+    
         window.removeEventListener('click', handleFirstInteraction);
         window.removeEventListener('touchstart', handleFirstInteraction);
       }
@@ -48,7 +47,8 @@ const App: React.FC = () => {
   };
 
   return (
-
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#000105]">
+      {/* Audio Element - Piano */}
       <audio 
         ref={audioRef}
         loop 
@@ -56,11 +56,9 @@ const App: React.FC = () => {
       />
 
       <div className="animate-fadeInSlow">
-       
         <Starfield />
-        
-        
         <SpaceSimulation />
+
         <button 
           onClick={toggleMusic}
           className="fixed bottom-8 right-8 z-[100] flex items-center justify-center w-12 h-12 rounded-full border border-white/10 bg-black/20 backdrop-blur-md text-white/50 hover:text-white hover:bg-white/10 transition-all duration-300"
@@ -78,12 +76,14 @@ const App: React.FC = () => {
             </div>
           )}
         </button>
+
         {!audioStarted && (
           <div className="fixed bottom-24 right-8 z-[100] pointer-events-none animate-pulse">
             <p className="text-[9px] text-white/20 tracking-[0.4em] uppercase vertical-text">Chạm để nghe nhạc</p>
           </div>
         )}
 
+        
         <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)] z-30" />
       </div>
 
