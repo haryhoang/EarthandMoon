@@ -1,58 +1,89 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Star } from './types';
 
+interface GalaxyStar extends Star {
+  z: number;
+  randomFactor: number;
+}
+
 const Starfield: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const starsRef = useRef<GalaxyStar[]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     let animationFrameId: number;
-    let stars: Star[] = [];
-    const colors = ['#ffffff', '#e0f2fe', '#fffbeb', '#f0f9ff', '#dbeafe', '#f8fafc', '#bfdbfe'];
+    const colors = ['#ffffff', '#f0f9ff', '#fffdeb', '#fafaf9', '#f8fafc'];
 
     const initStars = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      stars = [];
-      const count = Math.floor((window.innerWidth * window.innerHeight) / 600);
+      const stars: GalaxyStar[] = [];
+      
+      const count = Math.floor((window.innerWidth * window.innerHeight) / 300);
       for (let i = 0; i < count; i++) {
         stars.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: Math.random() * 1.4,
-          baseOpacity: 0.1 + Math.random() * 0.7,
-          twinkleSpeed: 0.0005 + Math.random() * 0.003,
+          radius: Math.random() * 0.22 + 0.02, 
+          baseOpacity: Math.random() * 0.05,
+          twinkleSpeed: 0.005 + Math.random() * 0.01,
           color: colors[Math.floor(Math.random() * colors.length)],
-          phase: Math.random() * Math.PI * 2
+          phase: Math.random() * Math.PI * 2,
+          z: Math.random() * 12 + 1,
+          randomFactor: Math.random() * 1000
         });
       }
+      starsRef.current = stars;
     };
 
     const render = (time: number) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      stars.forEach((s) => {
-        const opacity = s.baseOpacity + Math.sin(time * s.twinkleSpeed + s.phase) * 0.4;
-        const finalOpacity = Math.max(0.05, Math.min(1, opacity));
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const ryRaw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ry-raw')) || 0;
+      const rxRaw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rx-raw')) || 0;
+
+      ctx.globalCompositeOperation = 'lighter';
+
+      starsRef.current.forEach((s) => {
+        const flicker = (Math.sin(time * s.twinkleSpeed + s.phase) + Math.sin(time * 0.001 + s.randomFactor)) / 2;
+        const twinkle = Math.pow(Math.max(0, flicker), 20); 
         
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        const opacity = s.baseOpacity + twinkle * 1.5;
+        const finalOpacity = Math.max(0, Math.min(1, opacity));
+
+        if (finalOpacity < 0.01) return;
+
+        let drawX = (s.x + ryRaw * s.z * 0.25) % canvas.width;
+        if (drawX < 0) drawX += canvas.width;
         
-        if (finalOpacity > 0.8) {
-          ctx.shadowBlur = 8;
-          ctx.shadowColor = s.color;
-        } else {
-          ctx.shadowBlur = 0;
+        let drawY = (s.y + rxRaw * s.z * 0.08) % canvas.height;
+        if (drawY < 0) drawY += canvas.height;
+
+        if (twinkle > 0.4) {
+            ctx.beginPath();
+            const glowSize = s.radius * 20 * twinkle;
+            const starGrd = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, glowSize);
+            starGrd.addColorStop(0, s.color);
+            starGrd.addColorStop(0.5, 'transparent');
+            ctx.fillStyle = starGrd;
+            ctx.globalAlpha = finalOpacity * 0.3;
+            ctx.arc(drawX, drawY, glowSize, 0, Math.PI * 2);
+            ctx.fill();
         }
-        
+
+        ctx.beginPath();
+        ctx.arc(drawX, drawY, s.radius, 0, Math.PI * 2);
         ctx.fillStyle = s.color;
-        ctx.globalAlpha = finalOpacity;
+        ctx.globalAlpha = Math.min(1, finalOpacity * 2);
         ctx.fill();
       });
+      
       animationFrameId = requestAnimationFrame(render);
     };
 
@@ -69,4 +100,3 @@ const Starfield: React.FC = () => {
 };
 
 export default Starfield;
-
