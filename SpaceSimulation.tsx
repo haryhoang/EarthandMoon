@@ -101,8 +101,7 @@ const SpaceSimulation: React.FC = () => {
           </div>
         </div>
 
-        {/* MOON Orbit */}
-        <div 
+         <div 
           className="absolute preserve-3d"
           style={{ 
             width: `${moonOrbitRadiusX * 2}px`, 
@@ -112,21 +111,28 @@ const SpaceSimulation: React.FC = () => {
         >
           <div className="absolute inset-0 preserve-3d animate-[moonOrbit_180s_linear_infinite]">
              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 preserve-3d">
+                {/* Moon Body with Billboard effect and Spinning texture */}
                 <div 
-                  className="relative w-10 h-10 md:w-16 md:h-16 rounded-full preserve-3d"
+                  className="relative w-12 h-12 md:w-20 md:h-20 rounded-full preserve-3d"
                   style={{ transform: `rotateX(-75deg) rotateY(calc(-1 * var(--ry))) rotateX(calc(-1 * var(--rx)))` } as React.CSSProperties}
                 >
-                   <div className="absolute inset-[-10px] rounded-full bg-white/5 blur-2xl" />
-                   <div className="absolute inset-0 rounded-full overflow-hidden border border-white/10 bg-zinc-800 shadow-[inset_-12px_-12px_25px_black,0_0_40px_rgba(255,255,255,0.1)]">
+                   {/* Atmospheric Glow */}
+                   <div className="absolute inset-[-15px] rounded-full bg-white/5 blur-2xl pointer-events-none" />
+                   
+                   {/* Sphere Surface */}
+                   <div className="absolute inset-0 rounded-full overflow-hidden border border-white/10 bg-zinc-900 shadow-[inset_-10px_-10px_30px_rgba(0,0,0,1),0_0_40px_rgba(255,255,255,0.05)]">
+                      {/* Rotating Texture Layer */}
                       <div 
-                        className="absolute inset-0 bg-cover bg-center opacity-80"
+                        className="absolute inset-0 bg-cover bg-center opacity-90"
                         style={{
                             backgroundImage: `url('https://www.solarsystemscope.com/textures/download/2k_moon.jpg')`,
-                            backgroundSize: '200% 200%',
-                            backgroundPosition: `calc(var(--map-x) * 0.4) center`,
+                            backgroundSize: '200% 100%',
+                            backgroundPosition: `calc(var(--map-x) * 0.4) center`, // Xoay chậm hơn Trái Đất
                         } as React.CSSProperties}
                       />
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,_rgba(255,255,255,0.1)_0%,_transparent_60%,_rgba(0,0,0,0.9)_95%)]" />
+                      
+                      {/* 3D Lighting/Shading Layer */}
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,_rgba(255,255,255,0.15)_0%,_transparent_50%,_rgba(0,0,0,0.95)_100%)]" />
                    </div>
                 </div>
              </div>
@@ -153,3 +159,4 @@ const SpaceSimulation: React.FC = () => {
 };
 
 export default SpaceSimulation;
+
