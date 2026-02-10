@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from 'react';
 
 const SpaceSimulation: React.FC = () => {
-  const text = "Sinh nhật vui vẻ nhé  "; // Thêm khoảng trắng để phân tách các lần lặp
+  const text = "Sinh nhật vui vẻ nhé  "; 
   const repeatedText = text.repeat(3); 
+  // Chuyển chuỗi thành mảng để xử lý từng ký tự
   const characters = repeatedText.split("");
 
-  // Tránh lỗi SSR và tính toán lại khi resize
-  const [ringRadius, setRingRadius] = useState(450);
-  const [orbitX, setOrbitX] = useState(650);
+  const [dimensions, setDimensions] = useState({ ring: 450, orbitX: 650 });
 
   useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth < 768;
-      setRingRadius(isMobile ? 240 : 450);
-      setOrbitX(isMobile ? 420 : 650);
+      setDimensions({
+        ring: isMobile ? 240 : 450,
+        orbitX: isMobile ? 420 : 650
+      });
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const moonOrbitRadiusX = orbitX;
-  const moonOrbitRadiusY = moonOrbitRadiusX * 0.55;
+  const moonOrbitRadiusY = dimensions.orbitX * 0.55;
 
   return (
     <div className="fixed inset-0 z-20 overflow-hidden pointer-events-none flex items-center justify-center bg-transparent">
@@ -37,24 +37,22 @@ const SpaceSimulation: React.FC = () => {
         
         <div className="relative flex items-center justify-center" style={{ transformStyle: 'preserve-3d' }}>
           
-          {/* VISUAL ORBIT PATH */}
+          {/* QUỸ ĐẠO MẶT TRĂNG (Visual) */}
           <div 
-            className="absolute border border-white/5 rounded-[50%] pointer-events-none"
+            className="absolute border border-white/5 rounded-[50%]"
             style={{
-              width: `${moonOrbitRadiusX * 2}px`,
+              width: `${dimensions.orbitX * 2}px`,
               height: `${moonOrbitRadiusY * 2}px`,
               transform: 'rotateX(75deg) rotateY(-10deg)',
               borderWidth: '0.5px',
             }}
           />
 
-          {/* 3D EARTH SYSTEM */}
+          {/* HỆ THỐNG TRÁI ĐẤT */}
           <div className="relative" style={{ transformStyle: 'preserve-3d' }}>
             <div className="absolute inset-[-30px] rounded-full bg-blue-500/10 blur-[50px]" />
-            <div className="absolute inset-[-3px] rounded-full shadow-[0_0_40px_rgba(147,197,253,0.4)] z-30" />
-
             <div 
-              className="relative w-56 h-56 md:w-80 md:h-80 rounded-full will-change-transform"
+              className="relative w-56 h-56 md:w-80 md:h-80 rounded-full"
               style={{ 
                 transformStyle: 'preserve-3d',
                 transform: `rotateY(calc(-1 * var(--ry, 0deg))) rotateX(calc(-1 * var(--rx, 0deg)))` 
@@ -69,44 +67,33 @@ const SpaceSimulation: React.FC = () => {
                      backgroundPosition: `var(--map-x, 0%) center`,
                    } as React.CSSProperties}
                  />
-                 <div 
-                   className="absolute inset-0 bg-cover bg-center opacity-50 mix-blend-screen scale-105"
-                   style={{
-                     backgroundImage: `url('https://www.solarsystemscope.com/textures/download/2k_earth_clouds.jpg')`,
-                     backgroundSize: '200% 100%',
-                     backgroundPosition: `calc(var(--map-x, 0%) * 1.15) center`,
-                   } as React.CSSProperties}
-                 />
                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,_rgba(255,255,255,0.1)_0%,_transparent_45%,_rgba(0,0,0,0.98)_95%)] z-10" />
               </div>
             </div>
           </div>
 
-          {/* CHỮ ĐÃ ĐƯỢC SỬA: THUẬN CHIỀU & HƯỚNG RA NGOÀI */}
+          {/* VÒNG CHỮ - ĐÃ SỬA LỖI NGƯỢC */}
           <div 
-            className="absolute"
+            className="absolute flex items-center justify-center"
             style={{ 
               transformStyle: 'preserve-3d',
-              animation: 'ringSpin 90s linear infinite',
-              transform: 'rotateX(75deg) rotateY(-10deg)' 
+              animation: 'ringSpin 60s linear infinite',
             }} 
           >
             {characters.map((char, i) => {
-              // Sử dụng góc âm để chữ chạy theo chiều kim đồng hồ, tránh bị ngược thứ tự
+              // Sử dụng góc âm để thứ tự chữ chạy từ trái sang phải
               const angle = (i / characters.length) * 360;
               return (
                 <span
                   key={i}
-                  className="absolute left-1/2 top-1/2 text-white/90 font-medium text-[11px] md:text-[15px] whitespace-nowrap uppercase tracking-[0.2em]"
+                  className="absolute text-white font-bold text-[14px] md:text-[18px] whitespace-nowrap uppercase"
                   style={{
-                    // 1. rotateZ(${angle}deg): Đặt vị trí trên vòng tròn
-                    // 2. translateY: Đẩy ra bán kính ringRadius
-                    // 3. rotateX(-90deg): Dựng chữ đứng lên so với mặt phẳng nghiêng
-                    // 4. rotateY(0deg): Đảm bảo mặt chữ hướng ra ngoài (nếu vẫn ngược hãy thử 180deg)
-                    transform: `rotateZ(${-angle}deg) translateY(-${ringRadius}px) rotateX(-90deg)`,
-                    transformOrigin: '0 0',
-                    textShadow: '0 0 10px rgba(255,255,255,0.4)',
-                    display: 'inline-block'
+                    // 1. rotateY: Đưa chữ về vị trí quanh vòng tròn
+                    // 2. translateZ: Đẩy chữ ra xa tâm (bán kính)
+                    // 3. rotateY(0): Đảm bảo mặt chữ hướng thẳng về camera
+                    transform: `rotateY(${angle}deg) translateZ(${dimensions.ring}px)`,
+                    textShadow: '0 0 10px rgba(255,255,255,0.8)',
+                    backfaceVisibility: 'visible',
                   }}
                 >
                   {char === " " ? "\u00A0" : char}
@@ -116,17 +103,17 @@ const SpaceSimulation: React.FC = () => {
           </div>
         </div>
 
-        {/* MOON Orbit */}
+        {/* HỆ THỐNG MẶT TRĂNG */}
         <div 
           className="absolute"
           style={{ 
             transformStyle: 'preserve-3d',
-            width: `${moonOrbitRadiusX * 2}px`, 
+            width: `${dimensions.orbitX * 2}px`, 
             height: `${moonOrbitRadiusY * 2}px`,
             transform: 'rotateX(75deg) rotateY(-10deg)'
           }}
         >
-          <div className="absolute inset-0 animate-[moonOrbit_180s_linear_infinite]" style={{ transformStyle: 'preserve-3d' }}>
+          <div className="absolute inset-0 animate-[moonOrbit_120s_linear_infinite]" style={{ transformStyle: 'preserve-3d' }}>
              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ transformStyle: 'preserve-3d' }}>
                 <div 
                   className="relative w-10 h-10 md:w-16 md:h-16 rounded-full"
@@ -135,17 +122,15 @@ const SpaceSimulation: React.FC = () => {
                     transform: `rotateX(-75deg) rotateY(calc(-1 * var(--ry, 0deg))) rotateX(calc(-1 * var(--rx, 0deg)))` 
                   } as React.CSSProperties}
                 >
-                   <div className="absolute inset-[-10px] rounded-full bg-white/5 blur-2xl" />
-                   <div className="absolute inset-0 rounded-full overflow-hidden border border-white/10 bg-zinc-800 shadow-[inset_-12px_-12px_25px_black,0_0_40px_rgba(255,255,255,0.1)]">
+                   <div className="absolute inset-0 rounded-full overflow-hidden border border-white/10 bg-zinc-800">
                       <div 
-                        className="absolute inset-0 bg-cover bg-center opacity-80"
+                        className="absolute inset-0 bg-cover bg-center"
                         style={{
                             backgroundImage: `url('https://www.solarsystemscope.com/textures/download/2k_moon.jpg')`,
                             backgroundSize: '200% 200%',
                             backgroundPosition: `calc(var(--map-x, 0%) * 0.4) center`,
                         } as React.CSSProperties}
                       />
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,_rgba(255,255,255,0.1)_0%,_transparent_60%,_rgba(0,0,0,0.9)_95%)]" />
                    </div>
                 </div>
              </div>
@@ -160,8 +145,9 @@ const SpaceSimulation: React.FC = () => {
         }
 
         @keyframes ringSpin {
-          from { transform: rotateX(75deg) rotateY(-10deg) rotateZ(360deg); }
-          to { transform: rotateX(75deg) rotateY(-10deg) rotateZ(0deg); }
+          /* Xoay quanh trục Y để tạo hiệu ứng vòng quay truyền thống quanh Trái Đất */
+          from { transform: rotateX(10deg) rotateY(0deg); }
+          to { transform: rotateX(10deg) rotateY(-360deg); }
         }
       `}} />
     </div>
@@ -169,4 +155,3 @@ const SpaceSimulation: React.FC = () => {
 };
 
 export default SpaceSimulation;
-
