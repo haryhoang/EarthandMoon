@@ -2,7 +2,7 @@
 import React from 'react';
 
 const SpaceSimulation: React.FC = () => {
-  const text = "ehn tahn hnis gnum cuhc ";
+  const text = "ehn ev iuv tahn hnis ";
   const repeatedText = text.repeat(3); 
   const characters = repeatedText.split("");
   
@@ -153,4 +153,5 @@ const SpaceSimulation: React.FC = () => {
 };
 
 export default SpaceSimulation;
+
 
